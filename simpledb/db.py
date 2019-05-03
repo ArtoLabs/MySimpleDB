@@ -6,29 +6,24 @@ from screenlogger.screenlogger import Msg
 
 class DB:
     def __init__(self, dbuser, dbpass, dbname, logfilename, logpath, msgmode):
-        self.dbuser = dbuser
-        self.dbpass = dbpass
-        self.dbname = dbname
         self.msg = Msg(logfilename,
                        logpath,
                        msgmode)
-        self.db = None
-        self.cursor = None
+        self.db = pymysql.connect("localhost",
+                                  dbuser,
+                                  dbpass,
+                                  dbname)
+        self.cursor = self.db.cursor()
         self.dbresults = None
 
-    def open_db(self):
+    def __del__(self):
         """ opens a database connection
         """
-        self.db = pymysql.connect("localhost",
-                                  self.dbuser,
-                                  self.dbpass,
-                                  self.dbname)
-        self.cursor = self.db.cursor()
+        self.db.close()
 
     def get_results(self, sql, *args):
         """ Gets the results of an SQL statement
         """
-        self.open_db()
         try:
             self.cursor.execute(pymysql.escape_string(sql), args)
             self.dbresults = self.cursor.fetchall()
@@ -39,20 +34,11 @@ class DB:
             return False
         else:
             return len(self.dbresults)
-        finally:
-            # Every call to this method from the other
-            # classes in this package only takes place once
-            # so we can safely close the DB every time
-            # This can be moved to the deconstructor
-            # if functionality demands multiple calls to
-            # this method
-            self.db.close()
 
     def commit(self, sql, *args):
         """ Commits the actions of an SQL
         statement to the database
         """
-        self.open_db()
         try:
             self.cursor.execute(pymysql.escape_string(sql), args)
             self.db.commit()
@@ -62,7 +48,6 @@ class DB:
             return False
         else:
             return True
-        finally:
-            self.db.close()
+
 
 # EOF
