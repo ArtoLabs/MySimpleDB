@@ -11,8 +11,8 @@ setup(
     author='ArtoLabs',
     author_email='artopium@gmail.com',
     install_requires=[
-        'screenlogger',
-        'pymysql'
+        'screenlogger==1.3.1',
+        'pymysql==0.8.0'
     ],
     py_modules=['mysimpledb'],
     include_package_data=True,
